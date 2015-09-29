@@ -33,7 +33,8 @@ function verify(block) {
 
 	var finalHash = swapEndian(hash2);
 
-	console.log(finalHash);
+	// Finally verify the hash
+	console.log(finalHash === block.hash ? "The hash is correct!" : "The hash is incorrect!");
 }
 
 function hashHexToHex(hex) {
