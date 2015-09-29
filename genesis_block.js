@@ -2,7 +2,7 @@ var fileSystem = require('fs');
 var crypto = require('crypto');
 var buffer = require('buffer');
 
-var fileName = 'block_example';
+var fileName = 'genesis_block';
 
 fileSystem.readFile('C:\\dev\\bitcoin\\' + fileName + '.txt', function (err, logData) {
 	if (err) throw err;
@@ -14,12 +14,16 @@ fileSystem.readFile('C:\\dev\\bitcoin\\' + fileName + '.txt', function (err, log
 });
 
 function verify(block) {
+	// The previous block hash may not be present
+	var previousBlockHash = block.previousblockhash == undefined ? 
+		'0000000000000000000000000000000000000000000000000000000000000000' : block.previousblockhash;
+
 	// create the header value in hexadecimal
 	// Note: Bitcoin uses big-endian notation, so all the components must be converted
 	// to little-endian.
 	var hexHeader = 
 		swapEndian(numberToHex(block.version)) + 
-		swapEndian(block.previousblockhash || '') + 
+		swapEndian(previousBlockHash) + 
 		swapEndian(block.merkleroot) + 
 		swapEndian(numberToHex(block.time.toString(16))) + 
 		swapEndian(block.bits) + 
