@@ -1,5 +1,6 @@
 var fileSystem = require('fs');
 var crypto = require('crypto');
+var buffer = require('buffer');
 
 var fileName = 'block_example';
 
@@ -36,11 +37,10 @@ function verify(block) {
 }
 
 function hashHexToHex(hex) {
-	// First convert the hex value to binary so it can be hashed
-	var binary = hexToBin(hex);
+	var inputBuffer = new Buffer(hex, 'hex');
 
 	var hash = crypto.createHash('sha256');
-	hash.update(binary);
+	hash.update(inputBuffer);
 	return hash.digest('hex');
 }
 
@@ -59,19 +59,4 @@ function swapEndian(s) {
 function numberToHex(n) {
 	// Format this number to have 8 digits
 	return ("0000000" + n.toString(16)).substr(-8);
-}
-
-function hexPairToBin(h) {
-	// Format this number to have 8 digits
-	return ("0000000" + parseInt(h, 16).toString(2)).substr(-8);
-}
-
-function hexToBin(h) {
-	var result = '';
-	var hexArray = toArray(h);
-	for (var i = 0; i < hexArray.length; i += 1) {
-		result += hexPairToBin(hexArray[i]);
-	}
-
-	return result;
 }
