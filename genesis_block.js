@@ -13,29 +13,35 @@ fileSystem.readFile('C:\\dev\\bitcoin\\' + fileName + '.txt', function (err, log
 });
 
 function verify(block) {
-	var version = block.version;
-	var previousBlockHash = block.previousblockhash || '';
-	var merkleRoot = block.merkleroot;
-	var time = block.time.toString(16);
-	var bits = block.bits;
-	var nonce = block.nonce.toString(16);
-
 	// create the header value in hexadecimal
 	// Note: Bitcoin uses big-endian notation, so all the components must be converted
 	// to little-endian.
-	var hexHeader = bigToLittleEndian(numberToHex(version)) + 
-		bigToLittleEndian(previousBlockHash) + 
-		bigToLittleEndian(merkleRoot) + 
-		bigToLittleEndian(numberToHex(time)) + 
-		bigToLittleEndian(bits) + 
-		bigToLittleEndian(numberToHex(nonce));
+	var hexHeader = 
+		swapEndian(numberToHex(block.version)) + 
+		swapEndian(block.previousblockhash || '') + 
+		swapEndian(block.merkleroot) + 
+		swapEndian(numberToHex(block.time.toString(16))) + 
+		swapEndian(block.bits) + 
+		swapEndian(numberToHex(block.nonce.toString(16)));
 
-	var hexHeaderArray = toArray(hexHeader);
+	// Convert the header to binary so that it can be hashed
+	var hash1 = hashHexToHex(hexHeader);
 
-	var binHeader = '';
-	for (var i = 0; i < hexHeaderArray.length; i += 1) {
-		binHeader += hexToBin(hexHeaderArray[i]);
-	}
+	// It must be hashed twice...
+	var hash2 = hashHexToHex(hash1);
+
+	var finalHash = swapEndian(hash2);
+
+	console.log(finalHash);
+}
+
+function hashHexToHex(hex) {
+	// First convert the hex value to binary so it can be hashed
+	var binary = hexToBin(hex);
+
+	var hash = crypto.createHash('sha256');
+	hash.update(binary);
+	return hash.digest('hex');
 }
 
 function toArray(s) {
@@ -46,7 +52,7 @@ function toArray(s) {
 	return output;
 }
 
-function bigToLittleEndian(s) {
+function swapEndian(s) {
 	return toArray(s).reverse().join('');
 }
 
@@ -55,7 +61,17 @@ function numberToHex(n) {
 	return ("0000000" + n.toString(16)).substr(-8);
 }
 
-function hexToBin(h) {
+function hexPairToBin(h) {
 	// Format this number to have 8 digits
 	return ("0000000" + parseInt(h, 16).toString(2)).substr(-8);
+}
+
+function hexToBin(h) {
+	var result = '';
+	var hexArray = toArray(h);
+	for (var i = 0; i < hexArray.length; i += 1) {
+		result += hexPairToBin(hexArray[i]);
+	}
+
+	return result;
 }
