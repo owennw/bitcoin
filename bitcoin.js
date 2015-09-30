@@ -1,4 +1,4 @@
-var bitcoin = (function() {
+(function() {
 	'use strict';
 	var crypto = require('crypto');
 	var buffer = require('buffer');
