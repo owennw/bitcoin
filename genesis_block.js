@@ -54,7 +54,31 @@ function doubleHash(hex) {
 }
 
 function calculateMerkleRoot(block) {
-	return block.merkleroot;
+	var hashedTransactions = block.tx;
+	
+	while (hashedTransactions.length != 1) {
+		hashedTransactions = createNextTreeRow(hashedTransactions);
+	}
+
+	// This is now the merkleroot
+	return hashedTransactions.toString();
+}
+
+function createNextTreeRow(currentRow) {
+	var nextLevel = [];
+	var size = currentRow.length;
+
+	if (size % 2 == 1) {
+		// There are an odd number of transactions, so the final hash is duplicated
+		currentRow.push(currentRow[size - 1]);
+	}
+
+	for (i = 0; i < size; i += 2) {
+		var nextHash = swapEndian(doubleHash(swapEndian(currentRow[i]) + swapEndian(currentRow[i + 1])));
+		nextLevel.push(nextHash);
+	}
+
+	return nextLevel;
 }
 
 function hashHexToHex(hex) {
