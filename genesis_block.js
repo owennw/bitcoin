@@ -1,17 +1,30 @@
-var fileSystem = require('fs');
 var crypto = require('crypto');
 var buffer = require('buffer');
+var https = require('https');
 
-var fileName = 'genesis_block';
+var hash = process.argv[2];
+fetchAndVerifyBlock(hash);
 
-fileSystem.readFile('C:\\dev\\bitcoin\\' + fileName + '.txt', function (err, logData) {
-	if (err) throw err;
+function fetchAndVerifyBlock(h) {
+	var options = {
+		hostname: 'blockexplorer.com',
+		path: '/api/block/' + h
+	};
 
-	var text = logData.toString();
-    var block = JSON.parse(text);
+	var callback = function(res) {
+		var str = '';
+		res.on('data', function(d) {
+			str += d;
+		});
 
-	verify(block);
-});
+		res.on('end', function() {
+			var block = JSON.parse(str);
+			verify(block);
+		});
+	}
+
+	https.request(options, callback).end();
+}
 
 function verify(block) {
 	// The previous block hash may not be present
