@@ -1,57 +1,8 @@
-(function() {
+var bitcoin = (function() {
 	'use strict';
 	var crypto = require('crypto');
 	var buffer = require('buffer');
 	var https = require('https');
-
-	var hash = process.argv[2];
-	fetchBlock(hash, function(block) {
-		verify(block);
-	});
-
-	function fetchBlock(h, endCallback) {
-		var options = {
-			hostname: 'blockexplorer.com',
-			path: '/api/block/' + h
-		};
-
-		var requestCallback = function(res) {
-			var str = '';
-			res.on('data', function(d) {
-				str += d;
-			});
-
-			res.on('end', function() {
-				var block = JSON.parse(str);
-				endCallback(block);
-			});
-		}
-
-		https.request(options, requestCallback).end();
-	}
-
-	function verify(block) {
-		// The previous block hash may not be present
-		var previousBlockHash = block.previousblockhash == undefined ? 
-			'0000000000000000000000000000000000000000000000000000000000000000' : block.previousblockhash;
-
-		// create the header value in hexadecimal
-		// Note: Bitcoin uses big-endian notation, so all the components must be converted
-		// to little-endian.
-		var hexHeader = 
-			swapEndian(numberToHex(block.version)) + 
-			swapEndian(previousBlockHash) + 
-			swapEndian(calculateMerkleRoot(block)) + 
-			swapEndian(numberToHex(block.time.toString(16))) + 
-			swapEndian(block.bits) + 
-			swapEndian(numberToHex(block.nonce.toString(16)));
-
-		var hash2 = doubleHash(hexHeader);
-		var finalHash = swapEndian(hash2);
-
-		// Finally verify the hash
-		console.log(finalHash === block.hash ? "The hash is correct!" : "The hash is incorrect!");
-	}
 
 	function doubleHash(hex) {
 		return hashHexToHex(hashHexToHex(hex));
@@ -109,4 +60,49 @@
 		// Format this number to have 8 digits
 		return ("0000000" + n.toString(16)).substr(-8);
 	}
+
+	module.exports = {
+		fetch: function(hash, callback) {
+			var options = {
+				hostname: 'blockexplorer.com',
+				path: '/api/block/' + hash
+			};
+
+			var requestCallback = function(res) {
+				var str = '';
+				res.on('data', function(d) {
+					str += d;
+				});
+
+				res.on('end', function() {
+					callback(JSON.parse(str));
+				});
+			}
+
+			https.request(options, requestCallback).end();
+		},
+
+		verify: function(block) {
+			// The previous block hash may not be present
+			var previousBlockHash = block.previousblockhash == undefined ? 
+				'0000000000000000000000000000000000000000000000000000000000000000' : block.previousblockhash;
+
+			// create the header value in hexadecimal
+			// Note: Bitcoin uses big-endian notation, so all the components must be converted
+			// to little-endian.
+			var hexHeader = 
+				swapEndian(numberToHex(block.version)) + 
+				swapEndian(previousBlockHash) + 
+				swapEndian(calculateMerkleRoot(block)) + 
+				swapEndian(numberToHex(block.time.toString(16))) + 
+				swapEndian(block.bits) + 
+				swapEndian(numberToHex(block.nonce.toString(16)));
+
+			var hash2 = doubleHash(hexHeader);
+			var finalHash = swapEndian(hash2);
+
+			// Finally verify the hash
+			console.log(finalHash === block.hash ? "The hash is correct!" : "The hash is incorrect!");
+		}
+	};
 })();
