@@ -10,8 +10,8 @@
 
 	function calculateMerkleRoot(block) {
 		var hashedTransactions = block.tx;
-		
-		while (hashedTransactions.length != 1) {
+
+		while (hashedTransactions.length !== 1) {
 			hashedTransactions = createNextTreeRow(hashedTransactions);
 		}
 
@@ -23,7 +23,7 @@
 		var nextLevel = [];
 		var size = currentRow.length;
 
-		if (size % 2 == 1) {
+		if (size % 2 === 1) {
 			// There are an odd number of transactions, so the final hash is duplicated
 			currentRow.push(currentRow[size - 1]);
 		}
@@ -77,14 +77,14 @@
 				res.on('end', function() {
 					callback(JSON.parse(str));
 				});
-			}
+			};
 
 			https.request(options, requestCallback).end();
 		},
 
 		verify: function(block) {
 			// The previous block hash may not be present
-			var previousBlockHash = block.previousblockhash == undefined ? 
+			var previousBlockHash = block.previousblockhash === undefined ?
 				'0000000000000000000000000000000000000000000000000000000000000000' : block.previousblockhash;
 
 			// create the header value in hexadecimal
