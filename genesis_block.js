@@ -37,21 +37,24 @@ function verify(block) {
 	var hexHeader = 
 		swapEndian(numberToHex(block.version)) + 
 		swapEndian(previousBlockHash) + 
-		swapEndian(block.merkleroot) + 
+		swapEndian(calculateMerkleRoot(block)) + 
 		swapEndian(numberToHex(block.time.toString(16))) + 
 		swapEndian(block.bits) + 
 		swapEndian(numberToHex(block.nonce.toString(16)));
 
-	// Convert the header to binary so that it can be hashed
-	var hash1 = hashHexToHex(hexHeader);
-
-	// It must be hashed twice...
-	var hash2 = hashHexToHex(hash1);
-
+	var hash2 = doubleHash(hexHeader);
 	var finalHash = swapEndian(hash2);
 
 	// Finally verify the hash
 	console.log(finalHash === block.hash ? "The hash is correct!" : "The hash is incorrect!");
+}
+
+function doubleHash(hex) {
+	return hashHexToHex(hashHexToHex(hex));
+}
+
+function calculateMerkleRoot(block) {
+	return block.merkleroot;
 }
 
 function hashHexToHex(hex) {
