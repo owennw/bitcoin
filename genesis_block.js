@@ -5,15 +5,17 @@
 	var https = require('https');
 
 	var hash = process.argv[2];
-	fetchAndVerifyBlock(hash);
+	fetchBlock(hash, function(block) {
+		verify(block);
+	});
 
-	function fetchAndVerifyBlock(h) {
+	function fetchBlock(h, endCallback) {
 		var options = {
 			hostname: 'blockexplorer.com',
 			path: '/api/block/' + h
 		};
 
-		var callback = function(res) {
+		var requestCallback = function(res) {
 			var str = '';
 			res.on('data', function(d) {
 				str += d;
@@ -21,11 +23,11 @@
 
 			res.on('end', function() {
 				var block = JSON.parse(str);
-				verify(block);
+				endCallback(block);
 			});
 		}
 
-		https.request(options, callback).end();
+		https.request(options, requestCallback).end();
 	}
 
 	function verify(block) {
