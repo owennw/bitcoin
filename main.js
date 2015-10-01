@@ -5,6 +5,7 @@
 	var hash = process.argv[2];
 
 	bitcoin.fetch(hash, function(block) {
-		bitcoin.verify(block);
+		var correct = bitcoin.verify(block);
+		console.log(correct ? "The hash is correct!" : "The hash is incorrect!");
 	});
 })();

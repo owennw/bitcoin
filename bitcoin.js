@@ -102,7 +102,7 @@
 			var finalHash = swapEndian(hash2);
 
 			// Finally verify the hash
-			console.log(finalHash === block.hash ? "The hash is correct!" : "The hash is incorrect!");
+			return finalHash === block.hash;
 		}
 	};
 })();
