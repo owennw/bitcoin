@@ -61,22 +61,27 @@
 		return ("0000000" + n.toString(16)).substr(-8);
 	}
 
-	module.exports = {
-    fetch: function(hash, callback) {
-      var options = {
-        hostname: 'blockexplorer.com',
-        path: '/api/block/' + hash
-      };
-
-      var requestCallback = function(res) {
+  function get(hash) {
+    return new Promise(function(resolve, reject) {
+      https.get('https://blockexplorer.com/api/block/' + hash, function(res) {
         var stream = concatStream(function(data) {
-          callback(JSON.parse(data.toString()));
+          resolve(data.toString());
         });
 
         res.pipe(stream);
-      };
+      }).on('error', function() {
+        reject(Error('Error fetching block.'));
+      });
+    });
+  }
 
-      https.get(options, requestCallback);
+  function getJSON(hash) {
+    return get(hash).then(JSON.parse);
+  }
+
+	module.exports = {
+    fetch: function(hash) {
+      return getJSON(hash);
     },
 
 		verify: function(block) {
