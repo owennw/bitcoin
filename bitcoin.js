@@ -1,9 +1,7 @@
 (function() {
 	'use strict';
-	var crypto = require('crypto');
-	var https = require('https');
-  var concatStream = require('concat-stream');
-  var Q = require('q');
+  var crypto = require('crypto');
+  var rp = require('request-promise');
 
 	function doubleHash(hex) {
 		return hashHexToHex(hashHexToHex(hex));
@@ -62,26 +60,8 @@
 		return ("0000000" + n.toString(16)).substr(-8);
 	}
 
-  function get(hash) {
-    return createPromise(function(resolve, reject) {
-      https.get('https://blockexplorer.com/api/block/' + hash, function(res) {
-        var stream = concatStream(function(data) {
-          resolve(data.toString());
-        });
-
-        res.pipe(stream);
-      }).on('error', function() {
-        reject(Error('Error fetching block.'));
-      });
-    });
-  }
-
-  function createPromise(f) {
-    return new Q.Promise(f);
-  }
-
   function getJSON(hash) {
-    return get(hash).then(JSON.parse);
+    return rp('https://blockexplorer.com/api/block/' + hash).then(JSON.parse);
   }
 
 	module.exports = {
