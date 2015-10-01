@@ -1,8 +1,8 @@
 (function() {
 	'use strict';
 	var crypto = require('crypto');
-	var buffer = require('buffer');
 	var https = require('https');
+  var concatStream = require('concat-stream');
 
 	function doubleHash(hex) {
 		return hashHexToHex(hashHexToHex(hex));
