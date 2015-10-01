@@ -3,6 +3,7 @@
 	var crypto = require('crypto');
 	var https = require('https');
   var concatStream = require('concat-stream');
+  var Q = require('q');
 
 	function doubleHash(hex) {
 		return hashHexToHex(hashHexToHex(hex));
@@ -76,7 +77,7 @@
   }
 
   function createPromise(f) {
-    return new Promise(f);
+    return new Q.Promise(f);
   }
 
   function getJSON(hash) {
