@@ -14,7 +14,7 @@
 
             waitsFor(function () {
                 return block !== '';
-            }, 'block should be fetched', 1000);
+            }, 'block to be fetched', 1000);
 
             runs(function () {
                 check(

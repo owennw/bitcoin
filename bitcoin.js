@@ -62,25 +62,22 @@
 	}
 
 	module.exports = {
-		fetch: function(hash, callback) {
-			var options = {
-				hostname: 'blockexplorer.com',
-				path: '/api/block/' + hash
-			};
+    fetch: function(hash, callback) {
+      var options = {
+        hostname: 'blockexplorer.com',
+        path: '/api/block/' + hash
+      };
 
-			var requestCallback = function(res) {
-				var str = '';
-				res.on('data', function(d) {
-					str += d;
-				});
+      var requestCallback = function(res) {
+        var stream = concatStream(function(data) {
+          callback(JSON.parse(data.toString()));
+        });
 
-				res.on('end', function() {
-					callback(JSON.parse(str));
-				});
-			};
+        res.pipe(stream);
+      };
 
-			https.request(options, requestCallback).end();
-		},
+      https.get(options, requestCallback);
+    },
 
 		verify: function(block) {
 			// The previous block hash may not be present
