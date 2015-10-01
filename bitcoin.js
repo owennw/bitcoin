@@ -62,7 +62,7 @@
 	}
 
   function get(hash) {
-    return new Promise(function(resolve, reject) {
+    return createPromise(function(resolve, reject) {
       https.get('https://blockexplorer.com/api/block/' + hash, function(res) {
         var stream = concatStream(function(data) {
           resolve(data.toString());
@@ -73,6 +73,10 @@
         reject(Error('Error fetching block.'));
       });
     });
+  }
+
+  function createPromise(f) {
+    return new Promise(f);
   }
 
   function getJSON(hash) {
